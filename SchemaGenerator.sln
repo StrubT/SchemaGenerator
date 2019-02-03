@@ -11,25 +11,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchemaGenerator", "SchemaGenerator\SchemaGenerator.csproj", "{1868A977-440B-4FB7-BE3A-9AA7C89227DB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StrubTUtilities", "StrubTUtilities\StrubTUtilities\StrubTUtilities.csproj", "{1069534F-9372-4B93-A289-88C8CF4FD303}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-		Release-FSharp|Any CPU = Release-FSharp|Any CPU
-		Release-Minimal|Any CPU = Release-Minimal|Any CPU
-		Release-Console|Any CPU = Release-Console|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-Minimal|Any CPU.ActiveCfg = Release-Minimal|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-Minimal|Any CPU.Build.0 = Release-Minimal|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-FSharp|Any CPU.ActiveCfg = Release-FSharp|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-FSharp|Any CPU.Build.0 = Release-FSharp|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-Console|Any CPU.ActiveCfg = Release-Console|Any CPU
-		{1868A977-440B-4FB7-BE3A-9AA7C89227DB}.Release-Console|Any CPU.Build.0 = Release-Console|Any CPU
+		{1069534F-9372-4B93-A289-88C8CF4FD303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1069534F-9372-4B93-A289-88C8CF4FD303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1069534F-9372-4B93-A289-88C8CF4FD303}.Release|Any CPU.ActiveCfg = Release-Minimal|Any CPU
+		{1069534F-9372-4B93-A289-88C8CF4FD303}.Release|Any CPU.Build.0 = Release-Minimal|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

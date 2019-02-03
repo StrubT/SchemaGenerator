@@ -4,20 +4,18 @@
     <TargetFrameworks>net45;net472;netstandard2.0</TargetFrameworks>
     <Configurations>Debug;Release;Release-Minimal;Release-FSharp;Release-Console</Configurations>
     <ApplicationIcon>StrubT.ico</ApplicationIcon>
-    <RootNamespace>StrubT</RootNamespace>
+    <RootNamespace>StrubT.SchemaGenerator</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Authors>StrubT</Authors>
-    <Version>0.1</Version>
+    <Version>0.2.0</Version>
     <PackageProjectUrl>https://github.com/StrubT/SchemaGenerator</PackageProjectUrl>
     <RepositoryUrl>https://github.com/StrubT/SchemaGenerator</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/StrubT/SchemaGenerator/blob/master/LICENCE</PackageLicenseUrl>
     <PackageIconUrl>https://strubt.ch/images/StrubT.png</PackageIconUrl>
-    <OutputType>Exe</OutputType>
-    <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
@@ -28,6 +26,9 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <PackageReference Include="System.ValueTuple" Version="4.5.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StrubTUtilities\StrubTUtilities\StrubTUtilities.csproj" />
   </ItemGroup>
 
 </Project>
