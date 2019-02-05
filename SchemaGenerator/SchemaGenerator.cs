@@ -33,8 +33,11 @@ namespace StrubT.SchemaGenerator {
 			return ContentType.Default;
 		}
 
-		public static SchemaNode GenerateJsonSchema(JsonReader jsonReader) {
-			var nesting = new List<SchemaNode> { new SchemaNode(NodeType.Root, null) };
+		public static Schema GenerateJsonSchema(JsonReader jsonReader) {
+			var schema = new Schema();
+			var nesting = new Stack<SchemaNode>();
+			nesting.Push(schema);
+
 			var propertyName = string.Empty;
 			var contentType = ContentType.Default;
 
@@ -43,17 +46,17 @@ namespace StrubT.SchemaGenerator {
 					switch (jsonReader.TokenType) {
 						case JsonToken.StartObject:
 						case JsonToken.StartArray:
-							var container = nesting.Last().Children.SingleOrDefault(c => c.Name == propertyName);
-							if (container is null) nesting.Last().AddChild(container = new SchemaNode(NodeType.Child, propertyName));
+							var container = nesting.Peek().ChildNodes.SingleOrDefault(c => c.Name == propertyName);
+							if (container is null) container = nesting.Peek().AddChildNode(name: propertyName);
 							container.AddContentType(jsonReader.TokenType == JsonToken.StartArray ? ContentType.Array : ContentType.Object);
-							nesting.Add(container);
+							nesting.Push(container);
 
 							propertyName = string.Empty;
 							break;
 
 						case JsonToken.EndObject:
 						case JsonToken.EndArray:
-							nesting.RemoveAt(nesting.Count - 1);
+							nesting.Pop();
 							break;
 
 						case JsonToken.PropertyName:
@@ -77,58 +80,66 @@ namespace StrubT.SchemaGenerator {
 							goto case JsonToken.String;
 
 						case JsonToken.String:
-							var value = nesting.Last().Children.SingleOrDefault(c => c.Name == propertyName);
-							if (value is null) nesting.Last().AddChild(value = new SchemaNode(NodeType.Child, propertyName));
+							var value = nesting.Peek().ChildNodes.SingleOrDefault(c => c.Name == propertyName);
+							if (value is null) value = nesting.Peek().AddChildNode(name: propertyName);
 							value.AddContentType(contentType);
+							if (jsonReader.TokenType == JsonToken.String)
+								value.AddContentType(DetectContentType((string)jsonReader.Value));
 
 							propertyName = string.Empty;
 							contentType = ContentType.Default;
 							break;
 
 						default:
-							throw new Exception();
+							throw new InvalidOperationException();
 					}
 
-			return nesting.Single();
+			return schema;
 		}
 
-		public static SchemaNode GenerateXmlSchema(XmlReader xmlReader) {
-			var nesting = new List<SchemaNode> { new SchemaNode(NodeType.Root, null) };
+		public static Schema GenerateXmlSchema(XmlReader xmlReader) {
+			var schema = new Schema();
+			var nesting = new Stack<SchemaNode>();
+			nesting.Push(schema);
 
 			using (xmlReader)
 				while (xmlReader.Read())
 					switch (xmlReader.NodeType) {
 						case XmlNodeType.Element:
-							var qualifiedName = $"[{xmlReader.NamespaceURI}]:{xmlReader.LocalName}";
-							var container = nesting.Last().Children.SingleOrDefault(c => c.NodeType == NodeType.Child && c.Name == qualifiedName);
-							if (container is null) nesting.Last().AddChild(container = new SchemaNode(NodeType.Child, qualifiedName));
+							var qualifiedName = !string.IsNullOrEmpty(xmlReader.NamespaceURI) ? $"[{xmlReader.NamespaceURI}]:{xmlReader.LocalName}" : xmlReader.LocalName;
+							var container = schema.AllNodes.SingleOrDefault(c => c.NodeType == NodeType.Child && c.Name == qualifiedName);
+							if (!(container is null)) nesting.Peek().AddChildNode(container);
+							else {
+								container = nesting.Peek().ChildNodes.SingleOrDefault(c => c.NodeType == NodeType.Child && c.Name == qualifiedName);
+								if (container is null) container = nesting.Peek().AddChildNode(NodeType.Child, qualifiedName);
+							}
 							container.AddContentType(ContentType.Object);
 
-							if (!xmlReader.IsEmptyElement) nesting.Add(container);
+							if (!xmlReader.IsEmptyElement) nesting.Push(container);
 
 							while (xmlReader.MoveToNextAttribute()) {
-								var attribute = container.Children.SingleOrDefault(c => c.NodeType == NodeType.Attribute && c.Name == xmlReader.Name);
-								if (attribute is null) container.AddChild(attribute = new SchemaNode(NodeType.Attribute, xmlReader.Name));
+								var attribute = container.ChildNodes.SingleOrDefault(c => c.NodeType == NodeType.Attribute && c.Name == xmlReader.Name);
+								if (attribute is null) attribute = container.AddChildNode(NodeType.Attribute, xmlReader.Name);
 								attribute.AddContentType(DetectContentType(xmlReader.Value));
 							}
 							break;
 
 						case XmlNodeType.EndElement:
-							nesting.RemoveAt(nesting.Count - 1);
+							nesting.Pop();
 							break;
 
 						case XmlNodeType.CDATA:
 						case XmlNodeType.Text:
-							var value = nesting.Last().Children.SingleOrDefault(c => c.NodeType == NodeType.Child && c.Name is null);
-							if (value is null) nesting.Last().AddChild(value = new SchemaNode(NodeType.Child, null));
+							var value = nesting.Peek().ChildNodes.SingleOrDefault(c => c.NodeType == NodeType.Child && c.Name is null);
+							if (value is null) value = nesting.Peek().AddChildNode(NodeType.Child);
 							value.AddContentType(DetectContentType(xmlReader.Value));
 							break;
 
 						default:
-							throw new Exception();
+							throw new InvalidOperationException();
 					}
 
-			return nesting.Single();
+			return schema;
 		}
 	}
 }
