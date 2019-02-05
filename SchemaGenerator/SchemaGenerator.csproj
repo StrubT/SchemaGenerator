@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;net472;netstandard2.0</TargetFrameworks>
-    <Configurations>Debug;Release;Release-Minimal;Release-FSharp;Release-Console</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <ApplicationIcon>StrubT.ico</ApplicationIcon>
     <RootNamespace>StrubT.SchemaGenerator</RootNamespace>
     <LangVersion>latest</LangVersion>
