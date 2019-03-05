@@ -167,7 +167,7 @@ namespace StrubT.SchemaGenerator {
 			}
 
 			(T? Min, T? Max) GetMinMax<T>((T? Min, T? Max) range, T newValue) where T : struct, IComparable<T> =>
-				(!range.Min.HasValue || range.Min.Value.CompareTo(newValue) < 0 ? range.Min : newValue, !range.Max.HasValue || range.Max.Value.CompareTo(newValue) > 0 ? range.Max : newValue);
+				(range.Min.HasValue && range.Min.Value.CompareTo(newValue) < 0 ? range.Min : newValue, range.Max.HasValue && range.Max.Value.CompareTo(newValue) > 0 ? range.Max : newValue);
 		}
 
 		public SchemaNode AddChildNode(NodeType nodeType = NodeType.Child, string name = null) {
