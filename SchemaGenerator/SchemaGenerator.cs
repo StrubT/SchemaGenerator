@@ -21,9 +21,9 @@ namespace StrubT.SchemaGenerator {
 			var nesting = new Stack<SchemaNode>();
 			nesting.Push(schema);
 
-			var propertyName = string.Empty;
-			var arrayLength = 0;
+			var propertyName = default(string);
 			var schemaValue = default(SchemaValue);
+			var arrayLength = 0;
 
 			using (reader)
 				while (reader.Read())
@@ -34,7 +34,7 @@ namespace StrubT.SchemaGenerator {
 							if (container is null) container = nesting.Peek().AddChildNode(name: propertyName);
 							nesting.Push(container);
 
-							propertyName = string.Empty;
+							propertyName = null;
 							break;
 
 						case JsonToken.EndObject:
@@ -51,6 +51,10 @@ namespace StrubT.SchemaGenerator {
 						case JsonToken.PropertyName:
 							propertyName = (string)reader.Value;
 							break;
+
+						case JsonToken.Null:
+							schemaValue = new SchemaValue { Type = ContentType.Empty };
+							goto case JsonToken.String;
 
 						case JsonToken.Boolean:
 							schemaValue = new SchemaValue { Type = ContentType.Boolean, BooleanValue = (bool)reader.Value };
@@ -75,15 +79,12 @@ namespace StrubT.SchemaGenerator {
 							if (reader.TokenType == JsonToken.String) {
 								value.AddValue(new SchemaValue { Type = ContentType.String, StringValue = (string)reader.Value }, type);
 								value.AddValue(SchemaValue.ParseValue((string)reader.Value), type);
-							} else if (schemaValue.Type != ContentType.Empty)
+							} else
 								value.AddValue(schemaValue, type);
 
 							arrayLength++;
-							propertyName = string.Empty;
+							propertyName = null;
 							schemaValue = new SchemaValue { Type = ContentType.Empty };
-							break;
-
-						case JsonToken.Null:
 							break;
 
 						default:

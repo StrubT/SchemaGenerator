@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace StrubT.SchemaGenerator {
 
 	public struct SchemaValue {
 
-		static readonly string Iso8601DatePattern = @"(([+-]\d+)?\d{4}((-\d{2}){0,2}|(\d{2}){0,2}|(-W\d{2}(-\d)?)|(W\d{2}(\d)?)|(-?\d{3}))|--(\d{2}-?\d{2}))";
-		static readonly string Iso8601TimePattern = @"(\d{2}((((:\d{2}){2}|(\d{2}){2})(\.\d{3})?)|(:\d{2})?|(\d{2})?)(Z|[+-]\d{2}(:?\d{2})?)?)";
-		static readonly string Iso8601DateTimePattern = $"({Iso8601DatePattern}|{Iso8601TimePattern}|{Iso8601DatePattern}T{Iso8601TimePattern})";
-		static readonly string Iso8601DurationPattern = $@"(P((?=.)((\d+Y)?(\d+M)?(\d+D)?|{Iso8601DatePattern})(T(?=.)((\d+H)?(\d+M)?(\d+S)?|{Iso8601TimePattern}))?|\d+W))";
-		static readonly string Iso8601IntervalPattern = $@"((R\d*/)?({Iso8601DateTimePattern}/{Iso8601DateTimePattern}|{Iso8601DateTimePattern}/{Iso8601DurationPattern}|{Iso8601DurationPattern}/{Iso8601DateTimePattern}|{Iso8601DurationPattern}))";
-		static readonly Regex Iso8601Pattern = new Regex($"^({Iso8601DateTimePattern}|{Iso8601IntervalPattern})$", RegexOptions.Compiled);
+		static readonly string[] DateTimeFormats = new[] {
+			"o", // yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK
+			"yyyy'-'MM'-'dd'T'HH':'mmK",
+			"yyyy'-'MM'-'dd' 'HH':'mm",
+			"yyyy'-'MM'-'dd",
+			"r" }; // ddd, dd MMM yyyy HH':'mm':'ss 'GMT'
 
-		//static readonly string[] DateTimeFormats = new[] { "" }; // TODO
-		//static readonly string[] TimeSpanFormats = new[] { "" }; // TODO
+		static readonly string[] TimeSpanFormats = new[] {
+			"c", // [-][d'.']hh':'mm':'ss['.'fffffff]
+			"[-][d'.']hh':'mm" };
 
 		public ContentType Type { get; set; }
 
@@ -42,12 +43,10 @@ namespace StrubT.SchemaGenerator {
 			if (decimal.TryParse(value, out var @decimal))
 				return new SchemaValue { Type = @decimal % 1 == 0 ? ContentType.NumericInteger : ContentType.NumericDecimal, NumericValue = @decimal };
 
-			//if (DateTime.TryParseExact(value, DateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime))
-			//	return new SchemaValue { Type = ContentType.DateTime, DateTimeValue = dateTime };
-			//if (TimeSpan.TryParseExact(value, TimeSpanFormats, CultureInfo.InvariantCulture, TimeSpanStyles.None, out var timeSpan))
-			//	return new SchemaValue { Type = ContentType.TimeSpan, TimeSpanValue = timeSpan };
-			if (Iso8601Pattern.IsMatch(value))
-				return new SchemaValue { Type = ContentType.DateTime };
+			if (DateTime.TryParseExact(value, DateTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.NoCurrentDateDefault | DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var dateTime))
+				return new SchemaValue { Type = ContentType.DateTime, DateTimeValue = dateTime };
+			if (TimeSpan.TryParseExact(value, TimeSpanFormats, CultureInfo.InvariantCulture, out var timeSpan))
+				return new SchemaValue { Type = ContentType.TimeSpan, TimeSpanValue = timeSpan };
 
 			return new SchemaValue { Type = ContentType.Default, StringValue = value };
 		}
