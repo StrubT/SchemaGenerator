@@ -1,6 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace StrubT.SchemaGenerator {
 
@@ -30,7 +33,46 @@ namespace StrubT.SchemaGenerator {
 
 		//public static Schema Load(Stream stream) { } // TODO
 
-		//public void Persist(Stream stream) { } // TODO
+		public void Persist(string mainFile, string typedFileFormat = null) {
+
+			File.WriteAllText(mainFile, JsonConvert.SerializeObject(SerializeSchema(this)), Encoding.UTF8);
+
+			if (typedFileFormat != null)
+				foreach (var schemaType in AllSchemaTypes)
+					File.WriteAllText(string.Format(typedFileFormat, schemaType), JsonConvert.SerializeObject(SerializeSchema(this, schemaType)), Encoding.UTF8);
+		}
+
+		static Dictionary<string, object> SerializeSchema(Schema schema, string type = null) {
+
+			var ret = new Dictionary<string, object>();
+			if (!string.IsNullOrEmpty(schema.Name)) ret.Add("name", schema.Name);
+			if (string.IsNullOrEmpty(type)) ret.Add("schemaTypes", schema.AllSchemaTypes.ToList());
+			ret.Add("children", schema.ChildNodes.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type)).Select(n => SerializeSchema(n, type)).ToList());
+
+			return ret;
+		}
+
+		static Dictionary<string, object> SerializeSchema(SchemaNode node, string type = null) {
+
+			var ret = new Dictionary<string, object>();
+			if (!string.IsNullOrEmpty(node.Name)) ret.Add("name", node.Name);
+			ret.Add("type", Enum.GetName(typeof(NodeType), node.NodeType));
+			if (string.IsNullOrEmpty(type)) ret.Add("schemaTypes", node.SchemaTypes.ToList());
+			ret.Add("contentTypes", node.ContentTypes.Select(t => Enum.GetName(typeof(ContentType), t)).ToList());
+
+			var retValue = new Dictionary<string, object>();
+			if (node.ValueCount.Total > 0) retValue.Add("totalCount", node.ValueCount.Total);
+			if (node.ValueCount.Empty > 0) retValue.Add("emptyCount", node.ValueCount.Empty);
+			if (node.ValueLength.Min.HasValue) retValue.Add("length", new Dictionary<string, object> { { "min", node.ValueLength.Min }, { "max", node.ValueLength.Max } });
+			if (node.NumericValues.Min.HasValue) retValue.Add("numeric", new Dictionary<string, object> { { "min", node.NumericValues.Min }, { "max", node.NumericValues.Max } });
+			if (node.DateTimeValues.Min.HasValue) retValue.Add("dateTime", new Dictionary<string, object> { { "min", node.DateTimeValues.Min }, { "max", node.DateTimeValues.Max } });
+			if (node.TimeSpanValues.Min.HasValue) retValue.Add("timeSpan", new Dictionary<string, object> { { "min", node.TimeSpanValues.Min }, { "max", node.TimeSpanValues.Max } });
+			if (retValue.Any()) ret.Add("value", retValue);
+
+			ret.Add("children", node.ChildNodes.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type)).Select(n => SerializeSchema(n, type)).ToList());
+
+			return ret;
+		}
 
 		public override string ToString() => string.Join(" ", string.IsNullOrEmpty(Name) ? "unnamed" : string.Empty, "Schema", !string.IsNullOrEmpty(Name) ? $"'{Name}'" : string.Empty);
 	}
