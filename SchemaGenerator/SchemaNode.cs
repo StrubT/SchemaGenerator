@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +6,10 @@ namespace StrubT.SchemaGenerator {
 
 	public class Schema : SchemaNode {
 
+		readonly HashSet<string> _allSchemaTypes;
 		readonly HashSet<SchemaNode> _allNodes;
+
+		public IReadOnlyCollection<string> AllSchemaTypes { get; }
 
 		public IReadOnlyCollection<SchemaNode> AllNodes { get; }
 
@@ -14,9 +17,14 @@ namespace StrubT.SchemaGenerator {
 
 			Schema = this;
 
+			_allSchemaTypes = new HashSet<string>();
+			AllSchemaTypes = _allSchemaTypes.AsReadOnly();
+
 			_allNodes = new HashSet<SchemaNode>();
 			AllNodes = _allNodes.AsReadOnly();
 		}
+
+		internal void AddSchemaType(string schemaType) => _allSchemaTypes.Add(schemaType);
 
 		internal void AddNode(SchemaNode node) => _allNodes.Add(node);
 
@@ -73,9 +81,14 @@ namespace StrubT.SchemaGenerator {
 
 		public void AddValue(SchemaValue value, string type = null) {
 
-			ValueCount = (ValueCount.Total + 1, ValueCount.Empty + (value.Type == ContentType.Empty ? 1 : 0));
-			if (!string.IsNullOrWhiteSpace(type)) _schemaTypes.Add(type);
+			if (!string.IsNullOrWhiteSpace(type)) {
+				Schema.AddSchemaType(type);
+				_schemaTypes.Add(type);
+			}
+
 			_contentTypes.Add(value.Type);
+
+			ValueCount = (ValueCount.Total + 1, ValueCount.Empty + (value.Type == ContentType.Empty ? 1 : 0));
 
 			switch (value.Type) {
 				case ContentType.String:

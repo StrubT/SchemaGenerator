@@ -39,12 +39,12 @@ namespace StrubT.SchemaGenerator {
 
 						case JsonToken.EndObject:
 							container = nesting.Pop();
-							container.AddValue(new SchemaValue { Type = ContentType.Object });
+							container.AddValue(new SchemaValue { Type = ContentType.Object }, type);
 							break;
 
 						case JsonToken.EndArray:
 							container = nesting.Pop();
-							container.AddValue(new SchemaValue { Type = ContentType.Array, ArrayLength = arrayLength });
+							container.AddValue(new SchemaValue { Type = ContentType.Array, ArrayLength = arrayLength }, type);
 							arrayLength = 0;
 							break;
 
@@ -72,13 +72,18 @@ namespace StrubT.SchemaGenerator {
 							var value = nesting.Peek().ChildNodes.SingleOrDefault(c => c.Name == propertyName);
 							if (value is null) value = nesting.Peek().AddChildNode(name: propertyName);
 
-							value.AddValue(new SchemaValue { Type = ContentType.String, StringValue = (string)reader.Value }, type);
-							if (reader.TokenType == JsonToken.String) value.AddValue(SchemaValue.ParseValue((string)reader.Value), type);
-							else value.AddValue(schemaValue, type);
+							if (reader.TokenType == JsonToken.String) {
+								value.AddValue(new SchemaValue { Type = ContentType.String, StringValue = (string)reader.Value }, type);
+								value.AddValue(SchemaValue.ParseValue((string)reader.Value), type);
+							} else if (schemaValue.Type != ContentType.Empty)
+								value.AddValue(schemaValue, type);
 
 							arrayLength++;
 							propertyName = string.Empty;
 							schemaValue = new SchemaValue { Type = ContentType.Empty };
+							break;
+
+						case JsonToken.Null:
 							break;
 
 						default:
