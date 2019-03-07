@@ -47,12 +47,14 @@ namespace StrubT.SchemaGenerator {
 			var ret = new Dictionary<string, object>();
 			if (!string.IsNullOrEmpty(schema.Name)) ret.Add("name", schema.Name);
 			if (string.IsNullOrEmpty(type)) ret.Add("schemaTypes", schema.AllSchemaTypes.ToList());
-			ret.Add("children", schema.ChildNodes.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type)).Select(n => SerializeSchema(n, type)).ToList());
+			ret.Add("children", schema.ChildNodes
+				.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type))
+				.Select(n => SerializeSchema(n, new HashSet<SchemaNode> { n }, type)).ToList());
 
 			return ret;
 		}
 
-		static Dictionary<string, object> SerializeSchema(SchemaNode node, string type = null) {
+		static Dictionary<string, object> SerializeSchema(SchemaNode node, ISet<SchemaNode> parentNodes, string type = null) {
 
 			var ret = new Dictionary<string, object>();
 			if (!string.IsNullOrEmpty(node.Name)) ret.Add("name", node.Name);
@@ -69,7 +71,12 @@ namespace StrubT.SchemaGenerator {
 			if (node.TimeSpanValues.Min.HasValue) retValue.Add("timeSpan", new Dictionary<string, object> { { "min", node.TimeSpanValues.Min }, { "max", node.TimeSpanValues.Max } });
 			if (retValue.Any()) ret.Add("value", retValue);
 
-			ret.Add("children", node.ChildNodes.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type)).Select(n => SerializeSchema(n, type)).ToList());
+			if (!parentNodes.Add(node))
+				ret.Add("isCircular", true);
+			else
+				ret.Add("children", node.ChildNodes
+					.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type))
+					.Select(n => SerializeSchema(n, new HashSet<SchemaNode>(parentNodes) { n }, type)).ToList());
 
 			return ret;
 		}
