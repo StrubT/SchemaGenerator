@@ -7,7 +7,7 @@
     <RootNamespace>StrubT.SchemaGenerator</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Authors>StrubT</Authors>
-    <Version>0.4.1</Version>
+    <Version>0.4.2</Version>
     <PackageProjectUrl>https://github.com/StrubT/SchemaGenerator</PackageProjectUrl>
     <RepositoryUrl>https://github.com/StrubT/SchemaGenerator</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/StrubT/SchemaGenerator/blob/master/LICENCE</PackageLicenseUrl>
