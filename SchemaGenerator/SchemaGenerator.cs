@@ -88,7 +88,7 @@ namespace StrubT.SchemaGenerator {
 							break;
 
 						default:
-							throw new InvalidOperationException();
+							throw new InvalidOperationException($"Unhandled token type '{reader.TokenType:G}' encountered.");
 					}
 		}
 
@@ -139,7 +139,7 @@ namespace StrubT.SchemaGenerator {
 							break;
 
 						default:
-							throw new InvalidOperationException();
+							throw new InvalidOperationException($"Unhandled node type '{reader.NodeType:G}' encountered.");
 					}
 		}
 	}
