@@ -138,6 +138,9 @@ namespace StrubT.SchemaGenerator {
 							value.AddValue(SchemaValue.ParseValue(reader.Value), type);
 							break;
 
+						case XmlNodeType.SignificantWhitespace:
+							break;
+
 						default:
 							throw new InvalidOperationException($"Unhandled node type '{reader.NodeType:G}' encountered.");
 					}
