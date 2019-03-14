@@ -49,7 +49,7 @@ namespace StrubT.SchemaGenerator {
 			if (string.IsNullOrEmpty(type)) ret.Add("schemaTypes", schema.AllSchemaTypes.ToList());
 			ret.Add("children", schema.ChildNodes
 				.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type))
-				.Select(n => SerializeSchema(n, new HashSet<SchemaNode> { n }, type)).ToList());
+				.Select(n => SerializeSchema(n, new HashSet<SchemaNode>(), type)).ToList());
 
 			return ret;
 		}
