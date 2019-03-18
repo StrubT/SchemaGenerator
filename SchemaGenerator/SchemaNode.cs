@@ -49,7 +49,7 @@ namespace StrubT.SchemaGenerator {
 			if (string.IsNullOrEmpty(type)) ret.Add("schemaTypes", schema.AllSchemaTypes.ToList());
 			ret.Add("children", schema.ChildNodes
 				.Where(n => string.IsNullOrEmpty(type) || n.SchemaTypes.Contains(type))
-				.Select(n => SerializeSchema(n, new HashSet<SchemaNode>(), type)).ToList());
+				.Select(n => SerializeSchema(n, new HashSet<SchemaNode> { n }, type)).ToList());
 
 			return ret;
 		}
@@ -71,7 +71,7 @@ namespace StrubT.SchemaGenerator {
 			if (node.TimeSpanValues.Min.HasValue) retValue.Add("timeSpan", new Dictionary<string, object> { { "min", node.TimeSpanValues.Min }, { "max", node.TimeSpanValues.Max } });
 			if (retValue.Any()) ret.Add("value", retValue);
 
-			if (!parentNodes.Add(node))
+			if (parentNodes.Contains(node))
 				ret.Add("isCircular", true);
 			else
 				ret.Add("children", node.ChildNodes
