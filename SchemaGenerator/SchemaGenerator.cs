@@ -87,6 +87,9 @@ namespace StrubT.SchemaGenerator {
 							schemaValue = new SchemaValue { Type = ContentType.Empty };
 							break;
 
+						case JsonToken.Comment:
+							break;
+
 						default:
 							throw new InvalidOperationException($"Unhandled token type '{reader.TokenType:G}' encountered.");
 					}
@@ -138,6 +141,10 @@ namespace StrubT.SchemaGenerator {
 							value.AddValue(SchemaValue.ParseValue(reader.Value), type);
 							break;
 
+						case XmlNodeType.XmlDeclaration:
+						case XmlNodeType.DocumentType:
+						case XmlNodeType.Comment:
+						case XmlNodeType.Whitespace:
 						case XmlNodeType.SignificantWhitespace:
 							break;
 
